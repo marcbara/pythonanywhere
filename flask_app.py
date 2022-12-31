@@ -1,17 +1,40 @@
+from flask import Flask, render_template
+import plotly
+import plotly.graph_objs as go
 
-# A very simple Flask Hello World app for you to get started with...
-
-from flask import Flask, redirect, render_template, request, url_for
+import pandas as pd
+import numpy as np
+import json
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
 
-comments = []
+def create_plot():
+    N = 40
+    x = np.linspace(0, 1, N)
+    y = np.random.randn(N)
+    df = pd.DataFrame({'x': x, 'y': y}) # creating a sample dataframe
 
-@app.route("/", methods=["GET", "POST"])
+    data = [
+        go.Bar(
+            x=df['x'], # assign x as the dataframe column 'x'
+            y=df['y']
+        )
+    ]
+
+    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graphJSON
+
+@app.route('/')
 def index():
-    if request.method == "GET":
-        return render_template("main_page.html", comments=comments)
+    bar = create_plot()
+    return render_template('main_page.html', plot=bar)
 
-    comments.append(request.form["contents"])
-    return redirect(url_for('index'))
+if __name__ == '__main__':
+    app.run()
+
+
+
+
+if __name__ == '__main__':
+    app.run()
