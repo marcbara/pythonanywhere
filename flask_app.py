@@ -1,40 +1,23 @@
 from flask import Flask, render_template
-import plotly
-import plotly.graph_objs as go
-
 import pandas as pd
-import numpy as np
 import json
+import plotly
+import plotly.express as px
 
 app = Flask(__name__)
 
 def create_plot():
-    N = 40
-    x = np.linspace(0, 1, N)
-    y = np.random.randn(N)
-    df = pd.DataFrame({'x': x, 'y': y}) # creating a sample dataframe
+    df = pd.DataFrame({
+        'Fruit': ['Apples', 'Oranges', 'Bananas', 'Apples', 'Oranges', 'Bananas'],
+        'Amount': [4, 1, 2, 2, 4, 5],
+        'City': ['SF', 'SF', 'SF', 'Montreal', 'Montreal', 'Montreal']
+    })
 
-    data = [
-        go.Bar(
-            x=df['x'], # assign x as the dataframe column 'x'
-            y=df['y']
-        )
-    ]
+    fig = px.bar(df, x='Fruit', y='Amount', color='City', barmode='group')
 
-    graphJSON = json.dumps(data, cls=plotly.utils.PlotlyJSONEncoder)
-
-    return graphJSON
+    return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
 @app.route('/')
-def index():
-    bar = create_plot()
-    return render_template('main_page.html', plot=bar)
-
-if __name__ == '__main__':
-    app.run()
-
-
-
-
-if __name__ == '__main__':
-    app.run()
+def main_page():
+    graph_json = create_plot()
+    return render_template('main_page.html', graphJSON=graph_json)
